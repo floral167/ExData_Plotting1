@@ -1,20 +1,45 @@
 library(lubridate);
 
-read.csv(file="~/coursera//exploredata/household_power_consumption.txt", sep=";", header=T) ->comp_datacomp_data[comp_data$Date %in% c("1/2/2007","2/2/2007"),] -> data
+setwd("~/coursera/exploredata/ExData_Plotting1/")
+destfile <- "./household_power_consumption.zip"
+if(!file.exists(destfile)) {
+  fileUrl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+  download.file(fileUrl, destfile = destfile, method = "curl")
+}
 
-data[data$Global_active_power!="?",]->cleaned
-#write.table(file="~/coursera/exploredata/cleaned.csv", sep=",", cleaned, row.names=F)
-#read.csv(file="~/coursera//exploredata/cleaned.csv", sep=",", header=T) ->cleaned
-cleaned$l_Date <- dmy_hms(paste(cleaned$Date,cleaned$Time," "))
-#cleaned$Global_active_power<-as.numeric(as.character(cleaned$Global_active_power))
-par(mfrow=c(2,2), mar=c(4,4,2,2), oma = c(0, 0, 2, 0))
-#png(file="~/coursera/exploredata/ExData_Plotting1/figure/plot4.png", width=480, height=480)
-plot(x=cleaned$l_Date, y=cleaned$Global_active_power, type="l", ylab="Global Active Power",xlab="")
-plot(x=cleaned$l_Date, y=cleaned$Voltage, type="l", ylab="Voltage",xlab="Datetime")
-plot(x=cleaned$l_Date, y=cleaned$Sub_metering_1, type="l", ylab="Energy sub metering", xlab="")
-lines(x=cleaned$l_Date, y=cleaned$Sub_metering_2, type="l", col="red")
-lines(x=cleaned$l_Date, y=cleaned$Sub_metering_3, type="l", col="blue")
-legend("topright", seg.len=2, lty=1, col = c("black", "red", "blue"), legend = c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
-plot(x=cleaned$l_Date, y=cleaned$Global_reactive_power, type="l", ylab="Global_reactive_power", xlab="Datetime")
-dev.copy(png, file = "~/coursera/exploredata/ExData_Plotting1/figure/plot4.png")
+## Unzips dataset
+unzipedFile <- "./household_power_consumption.txt"
+#if(!file.exists(destfile)) {
+if(!file.exists(unzipedFile)) {
+  unzip(destfile)
+}
+
+## Reads the whole dataset since it's not that big
+comp_data <- read.table(unzipedFile, sep = ";", header = T, na.strings = "?")
+## get required date
+comp_data[comp_data$Date %in% c("1/2/2007","2/2/2007"),] -> data
+
+data$Date <- dmy_hms(paste(data$Date,data$Time," "))
+
+
+## Creates a 2x2 grid for placing the four plots.
+par(mfrow = c(2, 2))
+## Creates the first plot in (1, 1)
+plot(x=data$Date, y=data$Global_active_power, type="l", ylab="Global Active Power",xlab="")
+
+## Creates the second plot in (1, 2)
+plot(x=data$Date, y=data$Voltage, type="l", ylab="Voltage",xlab="Datetime")
+
+## Creates the third plot in (2, 1)
+plot(x=data$Date, y=data$Sub_metering_1, type="l", ylab="Energy sub metering", xlab="")
+lines(x=data$Date, y=data$Sub_metering_2, type="l", col="red")
+lines(x=data$Date, y=data$Sub_metering_3, type="l", col="blue")
+#legend("topright", seg.len=2, lty=1, col = c("black", "red", "blue"), legend = c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
+legend("topright", col = c("black", "red", "blue"), legend = c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), lwd = 1, bty = "n")
+
+## Creates the fourth plot in (2, 2)
+plot(x=data$Date, y=data$Global_reactive_power, type="l", ylab="Global_reactive_power", xlab="Datetime")
+
+
+dev.copy(png, file = "./plot4.png")
 dev.off()

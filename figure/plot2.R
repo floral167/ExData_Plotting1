@@ -1,15 +1,29 @@
 #plot2.R
 library(lubridate);
 
-read.csv(file="~/coursera//exploredata/household_power_consumption.txt", sep=";", header=T) ->comp_datacomp_data[comp_data$Date %in% c("1/2/2007","2/2/2007"),] -> data
+setwd("~/coursera/exploredata/ExData_Plotting1/")
+destfile <- "./household_power_consumption.zip"
+if(!file.exists(destfile)) {
+  fileUrl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+  download.file(fileUrl, destfile = destfile, method = "curl")
+}
 
-data[data$Global_active_power!="?",]->cleaned
-#write.table(file="~/coursera/exploredata/cleaned.csv", sep=",", cleaned, row.names=F)
-#read.csv(file="~/coursera//exploredata/cleaned.csv", sep=",", header=T) ->cleaned
-cleaned$l_Date <- dmy_hms(paste(cleaned$Date,cleaned$Time," "))
-cleaned$Global_active_power<-as.numeric(as.character(cleaned$Global_active_power))
-png(file="~/coursera/exploredata/ExData_Plotting1/figure/plot2.png", width=480, height=480)
-with(cleaned, plot(x=l_Date, y=Global_active_power, type="l", ylab="Global Active Power(killowatts)", xlab=""))
+## Unzips dataset
+unzipedFile <- "./household_power_consumption.txt"
+#if(!file.exists(destfile)) {
+if(!file.exists(unzipedFile)) {
+  unzip(destfile)
+}
+
+comp_data <- read.table(unzipedFile, sep = ";", header = T, na.strings = "?")
+## get required date
+comp_data[comp_data$Date %in% c("1/2/2007","2/2/2007"),] -> data
+# transform the Date column to a usable date format
+data$Date <- dmy_hms(paste(data$Date,data$Time," "))
+data$Global_active_power<-as.numeric(as.character(data$Global_active_power))
+#png(file="~/coursera/exploredata/ExData_Plotting1/figure/plot2.png", width=480, height=480)
+png(file="./plot2.png", width=480, height=480)
+with(data, plot(x=Date, y=Global_active_power, type="l", ylab="Global Active Power(killowatts)", xlab=""))
 dev.off()
 
 
